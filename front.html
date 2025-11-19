@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santhal Field - Pozo S-18</title>
+    <link rel="icon" type="image/jpeg" href="petro.jpg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Degradado de fallback */
+            background: linear-gradient(135deg, #000000 0%, #ffd700 100%);
+            
+            /* --- ESTILOS DE IMAGEN DE FONDO --- */
+            background-image: url('fondo.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            /* --- FIN: ESTILOS DE IMAGEN DE FONDO --- */
+            
+            min-height: 100vh;
+            padding: 20px;
+            
+            /* --- CAMBIO CLAVE: ELIMINAR SCROLL VERTICAL --- */
+            overflow-y: hidden; 
+            /* ------------------------------------------- */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 3.4em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.8em;
+            opacity: 0.9;
+        }
+
+        /* Vista de Monitoreo en Tiempo Real */
+        #monitor-view {
+            display: block;
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pulse {
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sensor-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgb(12, 11, 11);
+            border-radius: 15px;
+            padding: 110px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            font-size: 3.1em;
+        }
+
+        .card-title {
+            font-size: 1.9em;
+            color: #f6f4f4;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 3.6em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card-unit {
+            font-size: .9em;
+            color: #999;
+            font-weight: normal;
+        }
+
+        .card-timestamp {
+            color: #999;
+            font-size: 1.3em;
+        }
+
+        .temperatura-card .card-value { color: #f6f2f2; }
+        .presion-card .card-value { color: #f1f2f4; }
+
+        .button-container {
+            text-align: center;
+        }
+
+        .btn {
+            background: rgb(20, 18, 18);
+            color: #ebecf3;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Vista de Historial */
+        #history-view {
+            display: none;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .history-header h2 {
+            color: white;
+            font-size: 1.8em;
+        }
+
+        .btn-back {
+            background: rgb(6, 6, 6);
+            color: #f6f6f8;
+        }
+
+        .table-container {
+            background: rgb(13, 13, 13);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #a09c18 0%, #0a080c 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #e6e63566;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            color: #f8f8f8;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #f7f8f9;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .sensor-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .table-container {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Santhal Field - Pozo S-18</h1>
+            <p>Monitoreo en tiempo real de temperatura y presión</p>
+        </div>
+
+        <div id="monitor-view">
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <div class="pulse"></div>
+                    <span>Actualizando cada 10 segundos</span>
+                </div>
+                <div id="last-update">Esperando datos...</div>
+            </div>
+
+            <div class="sensor-cards">
+                <div class="card temperatura-card">
+                    <div class="card-header">
+                        <div class="icon">🌡️</div>
+                        <div class="card-title">Temperatura</div>
+                    </div>
+                    <div class="card-value">
+                        <span id="temperatura-valor">--</span>
+                        <span class="card-unit">°C</span>
+                    </div>
+                    <div class="card-timestamp" id="temperatura-timestamp">--</div>
+                </div>
+
+                <div class="card presion-card">
+                    <div class="card-header">
+                        <div class="icon">🌪️</div>
+                        <div class="card-title">Presión de fondo</div>
+                    </div>
+                    <div class="card-value">
+                        <span id="presion-valor">--</span>
+                        <span class="card-unit">PSI</span>
+                    </div>
+                    <div class="card-timestamp" id="presion-timestamp">--</div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button class="btn" onclick="mostrarHistorial()">
+                    Ver registros anteriores
+                </button>
+            </div>
+        </div>
+
+        <div id="history-view">
+            <div class="history-header">
+                <h2>Historial de Mediciones</h2>
+                <button class="btn btn-back" onclick="volverAMonitor()">
+                    ← Volver al monitor
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Temperatura</th>
+                            <th>Presión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        let intervalId = null;
+
+        // Función para obtener la última medición
+        async function obtenerUltimaMedicion() {
+            try {
+                const response = await fetch(`${API_URL}/api/ultima-medicion`);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    const medicion = data.data;
+                    
+                    // Actualizar temperatura
+                    document.getElementById('temperatura-valor').textContent = 
+                        medicion.temperatura.toFixed(2);
+                    document.getElementById('temperatura-timestamp').textContent = 
+                        `${medicion.fecha} ${medicion.hora}`;
+                    
+                    // Actualizar presión
+                    document.getElementById('presion-valor').textContent = 
+                        medicion.presion.toFixed(2);
+                    document.getElementById('presion-timestamp').textContent = 
+                        `${medicion.fecha} ${medicion.hora}`;
+                    
+                    // Actualizar última actualización
+                    const ahora = new Date();
+                    document.getElementById('last-update').textContent = 
+                        `Última actualización: ${ahora.toLocaleTimeString()}`;
+                } else {
+                    console.log('No hay datos disponibles');
+                }
+            } catch (error) {
+                console.error('Error al obtener última medición:', error);
+                document.getElementById('last-update').textContent = 
+                    'Error de conexión';
+            }
+        }
+
+        // Función para obtener el historial
+        async function obtenerHistorial() {
+            try {
+                const response = await fetch(`${API_URL}/api/mediciones`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = '';
+
+                if (data.success && data.data && data.data.length > 0) {
+                    data.data.forEach(medicion => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${medicion.id}</td>
+                            <td>${medicion.fecha}</td>
+                            <td>${medicion.hora}</td>
+                            <td>${medicion.temperatura.toFixed(2)} °C</td>
+                            <td>${medicion.presion.toFixed(2)} hPa</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="no-data">No hay registros disponibles</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error al obtener historial:', error);
+                const tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = '<tr><td colspan="5" class="error-message">Error al cargar los datos</td></tr>';
+            }
+        }
+
+        // Mostrar vista de historial
+        function mostrarHistorial() {
+            // Detener short polling
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+
+            // Cambiar vistas
+            document.getElementById('monitor-view').style.display = 'none';
+            document.getElementById('history-view').style.display = 'block';
+
+            // Cargar historial
+            obtenerHistorial();
+        }
+
+        // Volver a la vista de monitor
+        function volverAMonitor() {
+            // Cambiar vistas
+            document.getElementById('history-view').style.display = 'none';
+            document.getElementById('monitor-view').style.display = 'block';
+
+            // Reiniciar short polling
+            iniciarShortPolling();
+        }
+
+        // Iniciar short polling
+        function iniciarShortPolling() {
+            // Obtener datos inmediatamente
+            obtenerUltimaMedicion();
+
+            // Configurar polling cada 10 segundos
+            intervalId = setInterval(obtenerUltimaMedicion, 10000);
+        }
+
+        // Iniciar al cargar la página
+        window.addEventListener('load', () => {
+            iniciarShortPolling();
+        });
+
+        // Limpiar interval al cerrar la página
+        window.addEventListener('beforeunload', () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        });
+    </script>
+</body>
+</html>
