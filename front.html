@@ -101,7 +101,7 @@
         .card {
             background: rgb(12, 11, 11);
             border-radius: 15px;
-            padding: 110px;
+            padding: 85px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             transition: transform 0.3s ease;
         }
@@ -147,6 +147,7 @@
 
         .temperatura-card .card-value { color: #f6f2f2; }
         .presion-card .card-value { color: #f1f2f4; }
+        .viscosidad-card .card-value { color: #a78bfa; }
 
         .button-container {
             text-align: center;
@@ -300,7 +301,7 @@
     <div class="container">
         <div class="header">
             <h1>Santhal Field - Pozo S-18</h1>
-            <p>Monitoreo en tiempo real de temperatura y presión</p>
+            <p>Monitoreo en tiempo real de temperatura, presión y viscosidad</p>
         </div>
 
         <div id="monitor-view">
@@ -336,6 +337,18 @@
                     </div>
                     <div class="card-timestamp" id="presion-timestamp">--</div>
                 </div>
+
+                <div class="card viscosidad-card">
+                    <div class="card-header">
+                        <div class="icon">💧</div>
+                        <div class="card-title">Viscosidad</div>
+                    </div>
+                    <div class="card-value">
+                        <span id="viscosidad-valor">--</span>
+                        <span class="card-unit">cP</span>
+                    </div>
+                    <div class="card-timestamp" id="viscosidad-timestamp">--</div>
+                </div>
             </div>
 
             <div class="button-container">
@@ -362,11 +375,12 @@
                             <th>Hora</th>
                             <th>Temperatura</th>
                             <th>Presión</th>
+                            <th>Viscosidad</th>
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
                         <tr>
-                            <td colspan="5" class="loading">Cargando datos...</td>
+                            <td colspan="6" class="loading">Cargando datos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -375,7 +389,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8080';
+        const API_URL = '';
         let intervalId = null;
 
         // Función para obtener la última medición
@@ -397,6 +411,12 @@
                     document.getElementById('presion-valor').textContent = 
                         medicion.presion.toFixed(2);
                     document.getElementById('presion-timestamp').textContent = 
+                        `${medicion.fecha} ${medicion.hora}`;
+                    
+                    // Actualizar viscosidad
+                    document.getElementById('viscosidad-valor').textContent = 
+                        medicion.viscosidad.toFixed(2);
+                    document.getElementById('viscosidad-timestamp').textContent = 
                         `${medicion.fecha} ${medicion.hora}`;
                     
                     // Actualizar última actualización
@@ -430,17 +450,18 @@
                             <td>${medicion.fecha}</td>
                             <td>${medicion.hora}</td>
                             <td>${medicion.temperatura.toFixed(2)} °C</td>
-                            <td>${medicion.presion.toFixed(2)} hPa</td>
+                            <td>${medicion.presion.toFixed(2)} PSI</td>
+                            <td>${medicion.viscosidad.toFixed(2)} cP</td>
                         `;
                         tbody.appendChild(row);
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="no-data">No hay registros disponibles</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No hay registros disponibles</td></tr>';
                 }
             } catch (error) {
                 console.error('Error al obtener historial:', error);
                 const tbody = document.getElementById('history-tbody');
-                tbody.innerHTML = '<tr><td colspan="5" class="error-message">Error al cargar los datos</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="error-message">Error al cargar los datos</td></tr>';
             }
         }
 

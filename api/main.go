@@ -15,6 +15,7 @@ type Medicion struct {
 	ID          int       `json:"id"`
 	Temperatura float64   `json:"temperatura"`
 	Presion     float64   `json:"presion"`
+	Viscosidad     float64   `json:"viscosidad"`
 	Fecha       string    `json:"fecha"`
 	Hora        string    `json:"hora"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -23,6 +24,7 @@ type Medicion struct {
 type MedicionRequest struct {
 	Temperatura float64 `json:"temperatura"`
 	Presion     float64 `json:"presion"`
+	Viscosidad     float64 `json:"viscosidad"`
 	Fecha       string  `json:"fecha"`
 	Hora        string  `json:"hora"`
 }
@@ -78,8 +80,8 @@ func crearMedicion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `INSERT INTO mediciones (temperatura, presion, fecha, hora) VALUES (?, ?, ?, ?)`
-	result, err := db.Exec(query, req.Temperatura, req.Presion, req.Fecha, req.Hora)
+	query := `INSERT INTO mediciones (temperatura, presion, viscosidad, fecha, hora) VALUES (?, ?, ?, ?, ?)`
+	result, err := db.Exec(query, req.Temperatura, req.Presion, req.Viscosidad, req.Fecha, req.Hora)
 	if err != nil {
 		log.Println("Error al insertar medición:", err)
 		http.Error(w, "Error al guardar medición", http.StatusInternalServerError)
@@ -104,7 +106,7 @@ func obtenerUltimaMedicion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var medicion Medicion
-	query := `SELECT id, temperatura, presion, fecha, hora, created_at 
+	query := `SELECT id, temperatura, presion,viscosidad, fecha, hora, created_at 
 	          FROM mediciones 
 	          ORDER BY created_at DESC 
 	          LIMIT 1`
@@ -113,6 +115,7 @@ func obtenerUltimaMedicion(w http.ResponseWriter, r *http.Request) {
 		&medicion.ID,
 		&medicion.Temperatura,
 		&medicion.Presion,
+		&medicion.Viscosidad,
 		&medicion.Fecha,
 		&medicion.Hora,
 		&medicion.CreatedAt,
@@ -147,7 +150,7 @@ func obtenerMediciones(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `SELECT id, temperatura, presion, fecha, hora, created_at 
+	query := `SELECT id, temperatura, presion, viscosidad, fecha, hora, created_at 
 	          FROM mediciones 
 	          ORDER BY created_at DESC 
 	          LIMIT 100`
@@ -163,7 +166,7 @@ func obtenerMediciones(w http.ResponseWriter, r *http.Request) {
 	var mediciones []Medicion
 	for rows.Next() {
 		var m Medicion
-		err := rows.Scan(&m.ID, &m.Temperatura, &m.Presion, &m.Fecha, &m.Hora, &m.CreatedAt)
+		err := rows.Scan(&m.ID, &m.Temperatura, &m.Presion,&m.Viscosidad, &m.Fecha, &m.Hora, &m.CreatedAt)
 		if err != nil {
 			log.Println("Error al escanear medición:", err)
 			continue
